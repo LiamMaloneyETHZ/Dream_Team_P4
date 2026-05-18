@@ -12,6 +12,8 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
+from transformers import AutoTokenizer
+
 
 # Depending on your approach, you might need to adapt the structure of this template or parts not marked by TODOs.
 # It is not necessary to completely follow this template. Feel free to add more code and delete any parts that
@@ -25,16 +27,46 @@ train_val = pd.read_csv("train.csv")
 test_val = pd.read_csv("test_no_score.csv")
 
 # TODO: Fill out the SentimentDataset
+
+MODEL_NAME = "distilbert-base-uncased"
+MAX_LENGTH = 128
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
 class SentimentDataset(Dataset):
     def __init__(self, texts, labels=None):
-        pass
+        self.titles = titles
+        self.sentences = sentences
+        self.labels = labels
 
     def __len__(self):
-        pass
+        return len(self.sentences)
 
     def __getitem__(self, index):
-        # TODO: Tokenize and return a {input_ids, attention_mask, labels} dictionary, or just {input_ids, attention_mask} for test data.
-        pass
+        title = str(self.titles[index])
+        sentence = str(self.sentences[index])
+
+        text = title + " " + sentence
+
+        encoding = tokenizer(
+            text,
+            padding="max_length",
+            truncation=True,
+            max_length=MAX_LENGTH,
+            return_tensors="pt"
+        )
+
+        item = {
+            "input_ids": encoding["input_ids"].squeeze(0),
+            "attention_mask": encoding["attention_mask"].squeeze(0)
+        }
+
+        if self.labels is not None:
+            item["labels"] = torch.tensor(
+                self.labels[index],
+                dtype=torch.long
+            )
+        return item
 
 
 train_dataset = SentimentDataset(train_val["text"].tolist(), train_val["label"].tolist())
