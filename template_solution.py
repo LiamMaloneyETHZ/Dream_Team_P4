@@ -121,7 +121,7 @@ for epoch in range(NUM_EPOCHS):
 
         epoch_loss_sum += loss.item()
         n_batches += 1
-        
+
         scheduler.step()
 
     mean_loss = epoch_loss_sum / n_batches
