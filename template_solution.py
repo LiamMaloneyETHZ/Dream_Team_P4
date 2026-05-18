@@ -12,7 +12,7 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoModel
 
 
 # Depending on your approach, you might need to adapt the structure of this template or parts not marked by TODOs.
@@ -69,8 +69,16 @@ class SentimentDataset(Dataset):
         return item
 
 
-train_dataset = SentimentDataset(train_val["text"].tolist(), train_val["label"].tolist())
-test_dataset = SentimentDataset(test_val["text"].tolist())
+train_dataset = SentimentDataset(
+    train_val["title"].tolist(),
+    train_val["sentence"].tolist(),
+    train_val["score"].tolist()
+)
+
+test_dataset = SentimentDataset(
+    test_val["title"].tolist(),
+    test_val["sentence"].tolist()
+)
 
 train_loader = DataLoader(dataset=train_dataset,
                           batch_size=BATCH_SIZE,
