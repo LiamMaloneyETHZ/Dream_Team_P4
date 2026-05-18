@@ -64,27 +64,55 @@ class SentimentClassifier(nn.Module):
 
 model = SentimentClassifier().to(DEVICE)
 
-# TODO: Setup loss function, optimizer, and scheduler
-criterion = None
-optimizer = None
-scheduler = None
+# Training parameters
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
 
-model.train()
+best_loss = float("inf")
+best_state = None
+
+# Training loop
 for epoch in range(NUM_EPOCHS):
     model.train()
-    for batch in tqdm(train_loader, total=len(train_loader)):
+    epoch_loss_sum = 0.0
+    n_batches = 0
+
+    for batch in tqdm(train_loader, total=len(train_loader), desc=f"Epoch {epoch}"):
         batch = {k: v.to(DEVICE) for k, v in batch.items()}
 
-        # TODO: Set up training loop
+        optimizer.zero_grad()
+        output = model(batch["input_ids"], batch["attention_mask"])
+        loss = criterion(output, batch["labels"])
+        loss.backward()
+        optimizer.step()
 
+        epoch_loss_sum += loss.item()
+        n_batches += 1
+        
+        scheduler.step()
 
+    mean_loss = epoch_loss_sum / n_batches
+    marker = ""
+    if mean_loss < best_loss:
+        best_loss = mean_loss
+        best_state = model.state_dict().copy()
+        marker = " (best)"
+    print(f"Epoch {epoch} mean loss: {mean_loss:.6f}{marker}")
+
+if best_state is not None:
+    model.load_state_dict(best_state)
+
+# Evaluation loop
 model.eval()
 with torch.no_grad():
     results = []
     for batch in tqdm(test_loader, total=len(test_loader)):
         batch = {k: v.to(DEVICE) for k, v in batch.items()}
 
-        # TODO: Set up evaluation loop
+        output = model(batch["input_ids"], batch["attention_mask"])
+        preds = torch.argmax(output, dim=1)
+        results.append(preds.cpu().numpy())
 
     with open("result.txt", "w") as f:
         for val in np.concatenate(results):
