@@ -94,8 +94,8 @@ test_loader = DataLoader(dataset=test_dataset,
 
 # SentimentClassifier
 class SentimentClassifier(nn.Module):
-    def _init_(self):
-        super()._init_()
+    def __init__(self):
+        super().__init__()
         self.backbone = AutoModel.from_pretrained("distilbert-base-uncased")
         hidden_size = self.backbone.config.hidden_size
         for param in self.backbone.parameters():
