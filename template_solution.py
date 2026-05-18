@@ -1,6 +1,10 @@
-# This serves as a template which will guide you through the implementation of this task.  It is advised
-# to first read the whole template and get a sense of the overall structure of the code before trying to fill in any of the TODO gaps
-# First, we import necessary libraries:
+"""
+CITATION DISCLAIMER: AI USAGE
+
+The implementation of this script was supported by various AI tools, including
+ChatGPT, Gemini, and Claude. The underlying logic and problem-solving approach
+were developed by the students.
+"""
 
 import os
 # We disable low-level log outputs by default to keep the terminal clean
