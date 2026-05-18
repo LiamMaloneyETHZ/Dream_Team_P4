@@ -166,3 +166,6 @@ with torch.no_grad():
     with open("result.txt", "w") as f:
         for val in np.concatenate(results):
             f.write(f"{val}\n")
+
+import winsound
+winsound.Beep(1000, 1000)
