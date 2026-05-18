@@ -21,7 +21,7 @@ from transformers import AutoTokenizer, AutoModel
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 16  # Set the batch size according to both training performance and available memory
-NUM_EPOCHS = 3  # Set the number of epochs
+NUM_EPOCHS = 5  # Set the number of epochs
 
 train_val = pd.read_csv("train.csv")
 test_val = pd.read_csv("test_no_score.csv")
@@ -139,8 +139,6 @@ for epoch in range(NUM_EPOCHS):
         epoch_loss_sum += loss.item()
         n_batches += 1
 
-        scheduler.step()
-
     mean_loss = epoch_loss_sum / n_batches
     marker = ""
     if mean_loss < best_loss:
@@ -148,6 +146,8 @@ for epoch in range(NUM_EPOCHS):
         best_state = model.state_dict().copy()
         marker = " (best)"
     print(f"Epoch {epoch} mean loss: {mean_loss:.6f}{marker}")
+
+    scheduler.step()
 
 if best_state is not None:
     model.load_state_dict(best_state)
