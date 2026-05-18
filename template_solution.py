@@ -20,21 +20,20 @@ from transformers import AutoTokenizer, AutoModel
 # are not required
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-BATCH_SIZE = 16  # TODO: Set the batch size according to both training performance and available memory
-NUM_EPOCHS = 3  # TODO: Set the number of epochs
+BATCH_SIZE = 16  # Set the batch size according to both training performance and available memory
+NUM_EPOCHS = 3  # Set the number of epochs
 
 train_val = pd.read_csv("train.csv")
 test_val = pd.read_csv("test_no_score.csv")
 
-# TODO: Fill out the SentimentDataset
-
+# SentimentDataset
 MODEL_NAME = "distilbert-base-uncased"
 MAX_LENGTH = 128
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 class SentimentDataset(Dataset):
-    def __init__(self, texts, labels=None):
+    def __init__(self, titles, sentences, labels=None):
         self.titles = titles
         self.sentences = sentences
         self.labels = labels
@@ -93,13 +92,23 @@ test_loader = DataLoader(dataset=test_dataset,
 
 # Additional code if needed
 
-# TODO: Fill out SentimentClassifier
+# SentimentClassifier
 class SentimentClassifier(nn.Module):
-    def __init__(self):
-        super().__init__()
+    def _init_(self):
+        super()._init_()
+        self.backbone = AutoModel.from_pretrained("distilbert-base-uncased")
+        hidden_size = self.backbone.config.hidden_size
+        for param in self.backbone.parameters():
+            param.requires_grad = False
+        self.dropout = nn.Dropout(0.2)
+        self.classifier = nn.Linear(hidden_size, 2)  # 2 classes: negative (0) / positive (1)
 
     def forward(self, x):
-        return x
+        outputs = self.backbone(input_ids=x["input_ids"],
+                                attention_mask=x["attention_mask"])
+        cls_embedding = outputs.last_hidden_state[:, 0, :]
+        logits = self.classifier(self.dropout(cls_embedding))
+        return logits
 
 
 model = SentimentClassifier().to(DEVICE)
