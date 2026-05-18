@@ -103,9 +103,9 @@ class SentimentClassifier(nn.Module):
         self.dropout = nn.Dropout(0.2)
         self.classifier = nn.Linear(hidden_size, 2)  # 2 classes: negative (0) / positive (1)
 
-    def forward(self, x):
-        outputs = self.backbone(input_ids=x["input_ids"],
-                                attention_mask=x["attention_mask"])
+    def forward(self, input_ids, attention_mask):
+        outputs = self.backbone(input_ids=input_ids,
+                                attention_mask=attention_mask)
         cls_embedding = outputs.last_hidden_state[:, 0, :]
         logits = self.classifier(self.dropout(cls_embedding))
         return logits
