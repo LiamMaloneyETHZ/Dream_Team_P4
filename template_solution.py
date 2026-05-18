@@ -98,8 +98,6 @@ class SentimentClassifier(nn.Module):
         super().__init__()
         self.backbone = AutoModel.from_pretrained("distilbert-base-uncased")
         hidden_size = self.backbone.config.hidden_size
-        for param in self.backbone.parameters():
-            param.requires_grad = False
         self.dropout = nn.Dropout(0.2)
         self.classifier = nn.Linear(hidden_size, 2)  # 2 classes: negative (0) / positive (1)
 
@@ -115,7 +113,7 @@ model = SentimentClassifier().to(DEVICE)
 
 # Training parameters
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5, weight_decay=0.01)
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
 
 best_loss = float("inf")
